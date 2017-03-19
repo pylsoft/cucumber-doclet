@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>fr.pylsoft.doclet</groupId>
+  <artifactId>CucumberDoclet</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20170319.164533</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20170319164533</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>0.1.0-20170319.164533-1</value>
+        <updated>20170319164533</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>0.1.0-20170319.164533-1</value>
+        <updated>20170319164533</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>

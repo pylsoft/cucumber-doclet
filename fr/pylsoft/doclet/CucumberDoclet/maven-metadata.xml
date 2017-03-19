@@ -4,8 +4,8 @@
   <artifactId>CucumberDoclet</artifactId>
   <versioning>
     <versions>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.1.0-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20170319152941</lastUpdated>
+    <lastUpdated>20170319164533</lastUpdated>
   </versioning>
 </metadata>

@@ -3,7 +3,9 @@ package fr.pylsoft.doclet;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,11 +37,14 @@ import com.sun.javadoc.Tag;
 import com.sun.tools.javadoc.Main;
 
 public class Cucumber {
-	final static List<String> ANNOTATIONS_EXCLUES = Arrays.asList("Before", "After", "Test", "Override");
 	final static String SAUT_DE_LIGNE = "\\n";
 
 	final static public String DEPRECATED = "Deprecated";
 	final static public String EXAMPLE = "Example";
+
+	static List<String> ANNOTATIONS_INCLUSES = new ArrayList<>(); 
+	
+	final static Map<String,Integer> mapAnnotationsTrouvees = new HashMap<>();
 
 	static class TAG_XML {
 		public static final String RACINE = "JAVADOC";
@@ -51,6 +56,7 @@ public class Cucumber {
 		public static final String PHRASE = "PHRASE";
 		public static final String LIGNE = "LIGNE";
 		public static final String TAG = "TAG";
+		public static final String RESUME = "RESUME";
 	}
 
 	static class ATTRIBUT_XML {
@@ -62,6 +68,7 @@ public class Cucumber {
 		public static final String TYPE = "type";
 		public static final String NOM_PARAMETRE = "nomParametre";
 		public static final String DEPRECATED = "Deprecated";
+		public static final String NOMBRE_PHRASE = "nbPhrases";
 	}
 
 	public static void main(String[] args) {
@@ -74,9 +81,9 @@ public class Cucumber {
 					"C:\\Users\\pylpy\\.m2\\repository\\info\\cukes\\cucumber-java\\1.2.5\\cucumber-java-1.2.5.jar", //
 					"-docletpath", ".", //
 					"-encoding", "UTF-8", //
-					"-sourcepath", "D:\\Travail\\eclipse_Workspace\\DocletCucumber\\src", //
-					Option.XSL_HTML, "D:\\Travail\\eclipse_Workspace\\DocletCucumber\\src\\DocCucumberToHtml.xsl", //
-					Option.XSL_TXT, "D:\\Travail\\eclipse_Workspace\\DocletCucumber\\src\\DocCucumberToTexte.xsl", //
+					"-sourcepath", "D:\\Travail\\eclipse_Workspace\\prestation\\src\\test\\java", //
+					Option.XSL_HTML, "D:\\Travail\\eclipse_Workspace\\prestation\\doc\\DocCucumberToHtml.xsl", //
+					Option.XSL_TXT, "D:\\Travail\\eclipse_Workspace\\prestation\\doc\\DocCucumberToTexte.xsl", //
 					Option.XML, //
 					Option.HTML, //
 					Option.TXT, //
@@ -95,19 +102,35 @@ public class Cucumber {
 	 * @return
 	 */
 	public static boolean start(RootDoc root) {
+		try {
+			ANNOTATIONS_INCLUSES.addAll(Util.recupererListeAnnotationsCucumber());
+			ANNOTATIONS_INCLUSES.addAll(Arrays.asList(DEPRECATED));
+			
+			// ne pas oublier l'annotation @Deprecated 
 
+			creationDocumentXml(root);
+		} catch (DocletCucumberException e) {
+System.out.println(e.getMessage());
+			return false;
+		}
+		
+		return true;
+	}
+	private static void creationDocumentXml(final RootDoc root) throws DocletCucumberException {
+		
 		Map<String, String> listeOptions = new HashMap<>();
 		// Mise � jour des options
 		for (String[] option : root.options()) {
 			listeOptions.put(option[0], option.length > 1 ? option[1] : "");
 		}
 
+		
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		try {
 			final DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.newDocument();
 			Element elementRacine = document.createElement(TAG_XML.RACINE);
-			elementRacine.setAttribute(ATTRIBUT_XML.DATE, LocalDate.now().toString());
+			elementRacine.setAttribute(ATTRIBUT_XML.DATE, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm")));
 			elementRacine.setAttribute(ATTRIBUT_XML.VERSION,Cucumber.class.getPackage().getImplementationVersion());
 			document.appendChild(elementRacine);
 
@@ -119,16 +142,44 @@ public class Cucumber {
 				}
 			}
 
+			renseignerAnnotationsTrouveesDansDocument(document, elementRacine);
+			
 			creerFichiersSorties(listeOptions, document);
 
-		} catch (ParserConfigurationException e1) {
-			e1.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			throw new DocletCucumberException("Erreur durant la récupération de la configuration du Doclet", e);
 		}
-
-		return true;
 	}
 
-	private static void creerFichiersSorties(Map<String, String> listeOptions, Document document) {
+	private static void renseignerAnnotationsTrouveesDansDocument(Document document, Element elementRacine) {
+		if (mapAnnotationsTrouvees.isEmpty()) {
+			return;
+		}
+
+		Element elementResume = document.createElement(TAG_XML.RESUME);
+		elementRacine.appendChild(elementResume);
+
+		mapAnnotationsTrouvees.forEach((annotation, nombre) -> { 
+			System.out.println(annotation  + "=" + nombre + " phrases");
+			Element elementAnnotation = document.createElement(TAG_XML.ANNOTATION);
+			elementAnnotation.setAttribute(ATTRIBUT_XML.NOM, annotation);
+			elementAnnotation.setAttribute(ATTRIBUT_XML.NOMBRE_PHRASE, nombre.toString());			
+			elementResume.appendChild(elementAnnotation);			
+		});
+		
+	}
+	
+	private static void ajouterNouvellePhraseDansMapAnnotation(String nomAnnotation) {
+		Integer nombre = mapAnnotationsTrouvees.get(nomAnnotation);
+		if (nombre == null) {
+			nombre = new Integer(1);
+		} else {
+			nombre = Integer.sum(nombre,1);
+		}
+		mapAnnotationsTrouvees.put(nomAnnotation, nombre);
+	}
+
+	private static void creerFichiersSorties(Map<String, String> listeOptions, Document document) throws DocletCucumberException {
 
 		try {
 			final TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -182,7 +233,7 @@ public class Cucumber {
 				System.out.println("Fichier '" + pathFichierTxt + "' créé.");
 			}
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			throw new DocletCucumberException("Erreur la préparation du fichier de sortie", e);
 		}
 	}
 
@@ -279,11 +330,12 @@ public class Cucumber {
 			final AnnotationDesc annotation, final Parameter[] parametres) {
 		String nomAnnotation = annotation.annotationType().simpleTypeName();
 
-		if (ANNOTATIONS_EXCLUES.contains(nomAnnotation)) {
+		if (!ANNOTATIONS_INCLUSES.contains(nomAnnotation)) {
 			return null;
 		}
 		if (Objects.equals(nomAnnotation, DEPRECATED)) {
 			elmFonction.setAttribute(ATTRIBUT_XML.DEPRECATED, "true");
+			ajouterNouvellePhraseDansMapAnnotation(DEPRECATED);
 			return null;
 		} else {
 			final Element elmAnnotation = document.createElement(TAG_XML.ANNOTATION);
@@ -296,7 +348,11 @@ public class Cucumber {
 						creerListeChoixPhrase(document, elmAnnotation, phrase, parametres);
 					});
 
-			return elmAnnotation.getAttribute(ATTRIBUT_XML.PHRASE) != null ? elmAnnotation : null;
+			if (elmAnnotation.getAttribute(ATTRIBUT_XML.PHRASE) != null) {
+				ajouterNouvellePhraseDansMapAnnotation(nomAnnotation);
+				return elmAnnotation;				
+			}
+			return null;
 		}
 	}
 

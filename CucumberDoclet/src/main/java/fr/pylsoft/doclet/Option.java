@@ -3,17 +3,17 @@ package fr.pylsoft.doclet;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Option {
-	public static final String NAME = "-name";
-	public static final String OUT = "-d";
-	public static final String XSL_TXT = "-xsltxt";
-	public static final String XSL_HTML = "-xslhtml";
-	public static final String XML = "-xml";
-	public static final String HTML = "-html";
-	public static final String TXT = "-txt";
-	public static final String TRANSFORMERS = "-t";
+final class Option {
+	static final String NAME = "-name";
+	static final String OUT = "-d";
+	static final String XSL_TXT = "-xsltxt";
+	static final String XSL_HTML = "-xslhtml";
+	static final String XML = "-xml";
+	static final String HTML = "-html";
+	static final String TXT = "-txt";
+	private static final String TRANSFORMERS = "-t";
 
-	public static final Map<String, Integer> OPTIONS_LENGTH = new HashMap<>();
+	static final Map<String, Integer> OPTIONS_LENGTH = new HashMap<>();
 
 	static {
 		OPTIONS_LENGTH.put(OUT, 2);

@@ -5,12 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,38 +32,38 @@ import com.sun.javadoc.Tag;
 import com.sun.tools.javadoc.Main;
 
 public class Cucumber {
-	final static String SAUT_DE_LIGNE = "\\n";
+	private final static String SAUT_DE_LIGNE = "\\n";
 
-	final static public String DEPRECATED = "Deprecated";
-	final static public String EXAMPLE = "Example";
+	private final static String DEPRECATED = "Deprecated";
+	private final static String EXAMPLE = "Example";
 
-	static List<String> ANNOTATIONS_INCLUSES = new ArrayList<>(); 
+	private final static List<String> ANNOTATIONS_INCLUSES = new ArrayList<>();
 	
-	final static Map<String,Integer> mapAnnotationsTrouvees = new HashMap<>();
+	private final static Map<String,Integer> mapAnnotationsTrouvees = new HashMap<>();
 
 	static class TAG_XML {
-		public static final String RACINE = "JAVADOC";
-		public static final String CLASSE = "CLASSE";
-		public static final String FONCTION = "FONCTION";
-		public static final String ANNOTATION = "ANNOTATION";
-		public static final String COMMENTAIRE = "COMMENTAIRE";
-		public static final String PARAM = "PARAM";
-		public static final String PHRASE = "PHRASE";
-		public static final String LIGNE = "LIGNE";
-		public static final String TAG = "TAG";
-		public static final String RESUME = "RESUME";
+		static final String RACINE = "JAVADOC";
+		static final String CLASSE = "CLASSE";
+		static final String FONCTION = "FONCTION";
+		static final String ANNOTATION = "ANNOTATION";
+		static final String COMMENTAIRE = "COMMENTAIRE";
+		static final String PARAM = "PARAM";
+		static final String PHRASE = "PHRASE";
+		static final String LIGNE = "LIGNE";
+		static final String TAG = "TAG";
+		static final String RESUME = "RESUME";
 	}
 
 	static class ATTRIBUT_XML {
-		public static final String VERSION = "docletVersion";
-		public static final String DATE = "date";
-		public static final String NOM = "nom";
-		public static final String PHRASE = "phrase";
-		public static final String VALUE = "value";
-		public static final String TYPE = "type";
-		public static final String NOM_PARAMETRE = "nomParametre";
-		public static final String DEPRECATED = "Deprecated";
-		public static final String NOMBRE_PHRASE = "nbPhrases";
+		static final String VERSION = "docletVersion";
+		static final String DATE = "date";
+		static final String NOM = "nom";
+		static final String PHRASE = "phrase";
+		static final String VALUE = "value";
+		static final String TYPE = "type";
+		static final String NOM_PARAMETRE = "nomParametre";
+		static final String DEPRECATED = "Deprecated";
+		static final String NOMBRE_PHRASE = "nbPhrases";
 	}
 
 	public static void main(String[] args) {
@@ -104,7 +99,7 @@ public class Cucumber {
 	public static boolean start(RootDoc root) {
 		try {
 			ANNOTATIONS_INCLUSES.addAll(Util.recupererListeAnnotationsCucumber());
-			ANNOTATIONS_INCLUSES.addAll(Arrays.asList(DEPRECATED));
+			ANNOTATIONS_INCLUSES.addAll(Collections.singletonList(DEPRECATED));
 			
 			// ne pas oublier l'annotation @Deprecated 
 
@@ -172,7 +167,7 @@ System.out.println(e.getMessage());
 	private static void ajouterNouvellePhraseDansMapAnnotation(String nomAnnotation) {
 		Integer nombre = mapAnnotationsTrouvees.get(nomAnnotation);
 		if (nombre == null) {
-			nombre = new Integer(1);
+			nombre = 1;
 		} else {
 			nombre = Integer.sum(nombre,1);
 		}
@@ -244,7 +239,7 @@ System.out.println(e.getMessage());
 		Arrays.stream(classeDoc.methods()) //
 				.map(methodDoc -> docParMethode(document, methodDoc)) //
 				.filter(Objects::nonNull) //
-				.forEach(elm -> elmClasse.appendChild(elm));
+				.forEach(elmClasse::appendChild);
 
 		return elmClasse.getChildNodes().getLength() > 0 ? elmClasse : null;
 	}
@@ -257,7 +252,7 @@ System.out.println(e.getMessage());
 			Arrays.stream(method.annotations()) //
 					.map(annotationDesc -> docParAnnotation(document, elmMethode, annotationDesc, method.parameters())) //
 					.filter(Objects::nonNull) //
-					.forEach(elm -> elmMethode.appendChild(elm));
+					.forEach(elmMethode::appendChild);
 
 			if (elmMethode.getChildNodes().getLength() > 0) {
 				docParParametre(document, elmMethode, method.parameters());

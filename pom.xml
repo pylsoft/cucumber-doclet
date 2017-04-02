@@ -86,7 +86,6 @@
                     <repositoryName>cucumber-doclet</repositoryName>
                     <!-- github username -->
                     <repositoryOwner>pylsoft</repositoryOwner>
-                    <serveur>github</serveur>
                 </configuration>
                 <executions>
                     <execution>

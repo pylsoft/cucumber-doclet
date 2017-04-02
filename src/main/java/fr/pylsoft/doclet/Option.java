@@ -11,7 +11,7 @@ final class Option {
 	static final String XML = "-xml";
 	static final String HTML = "-html";
 	static final String TXT = "-txt";
-	private static final String TRANSFORMERS = "-t";
+	static final String TRANSFORMERS = "-t";
 
 	static final Map<String, Integer> OPTIONS_LENGTH = new HashMap<>();
 

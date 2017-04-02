@@ -31,7 +31,7 @@ class Util {
         System.out.println("----------");
         System.out.println("- Test 2 -");
         System.out.println("----------");
-        String phraseApresTraitement = "un b�n�ficiaire : ouvrant-droit avec le matricule '(.*)' et le num�ro de famille '(.*)':";
+        String phraseApresTraitement = "un bénéficiaire : ouvrant-droit avec le matricule '(.*)' et le numéro de famille '(.*)':";
         System.out.println(phraseApresTraitement);
         System.out.println("-------");
         {
@@ -48,7 +48,7 @@ class Util {
         System.out.println("----------");
         try {
             List<String> listeAnnotations = recupererListeAnnotationsCucumber();
-            System.out.println("nb annotation cucumber trouvé =" + listeAnnotations.size());
+            System.out.println("nb annotation cucumber trouvée =" + listeAnnotations.size());
 
 //			listeAnnotations .stream() //
 //			.map(nom -> " - " + nom) //

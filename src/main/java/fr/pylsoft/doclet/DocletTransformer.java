@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Create class inherit from this interface to generate your own rapport.
  * <p>
- * Don't forget to put the '-t <yourTransformerClass>' when you call javadoc exe
+ * Don't forget to put the '-t yourTransformerClass' when you call javadoc exe
  *
  * @author pylsoft
  */
@@ -84,6 +84,7 @@ public abstract class DocletTransformer {
      *
      * @param elementRacine - l'élément racine du flux XML contenant la cucumber doc
      * @param printer       - le printer pour écrire dans le fichier
+     * @throws DocletCucumberException en cas d'erreur durant la generation du fichier
      */
     public abstract void genererCucumberDoc(final Element elementRacine, final PrintWriter printer) throws DocletCucumberException;
 

@@ -4,17 +4,54 @@
 
     <groupId>fr.pylsoft.doclet</groupId>
     <artifactId>CucumberDoclet</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>CucumberDoclet</name>
+    <description>A javadoc doclet to generate cucumber sentences list.</description>
+
+    <url>https://github.com/pylsoft/cucumber-doclet</url>
+
+    <developers>
+        <developer>
+            <id>pylsoft</id>
+            <name>Pylsoft</name>
+            <email>pylsoft44@gmail.com</email>
+            <url>none</url>
+            <timezone>+1</timezone>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License v3.0</name>
+            <url>http://www.gnu.org/licenses/quick-guide-gplv3.html</url>
+        </license>
+    </licenses>
+
+
+    <!-- GitHub Software Configuration Management -->
+    <scm>
+        <url>https://github.com/pylsoft/cucumber-doclet</url>
+        <connection>scm:git:ssh://git@github.com/pylsoft/cucumber-doclet.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/pylsoft/cucumber-doclet.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <source.encoding>UTF-8</source.encoding>
 
-        <github.global.server>github</github.global.server>
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+
 
     </properties>
 
@@ -32,67 +69,70 @@
             <version>1.2.5</version>
         </dependency>
     </dependencies>
+
+    <!-- Deploy snapshots to the Sonatype OSSRH (OSS Repository Hosting) -->
     <distributionManagement>
-        <repository>
-            <id>internal.repo</id>
-            <name>Temporary Staging Repository</name>
-            <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
+        <!--<downloadUrl>https://github.com/pylsoft/cucumber-doclet</downloadUrl>-->
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <build>
         <plugins>
+            <!-- Pour déployer dans OSSRH et pour releaser dans le central repository -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>${nexus-staging-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <!-- Pour attacher un jar de source -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
-                <configuration>
-                    <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo
-                    </altDeploymentRepository>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.github</groupId>
-                <artifactId>site-maven-plugin</artifactId>
-                <version>0.12</version>
-                <configuration>
-                    <!-- git commit message -->
-                    <message>Building site for ${project.version}</message>
-                    <!-- disable webpage processing -->
-                    <noJekyll>true</noJekyll>
-                    <!-- matches distribution management repository url above -->
-                    <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-                    <!-- remote branch name -->
-                    <branch>refs/heads/mvn-repo</branch>
-                    <!-- If you remove this then the old artifact will be removed and new
-                        one will replace. But with the merge tag you can just release by changing
-                        the version -->
-                    <merge>true</merge>
-                    <includes>
-                        <include>**/*</include>
-                    </includes>
-                    <!-- github repo name -->
-                    <repositoryName>cucumber-doclet</repositoryName>
-                    <!-- github username -->
-                    <repositoryOwner>pylsoft</repositoryOwner>
-                </configuration>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>attach-sources</id>
                         <goals>
-                            <goal>site</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
-                        <phase>deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Pour générer la javadoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- nécessaire pour le déploiement pour signer les fichiers -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${maven-gpg-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
